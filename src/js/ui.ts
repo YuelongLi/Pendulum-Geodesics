@@ -2,7 +2,6 @@
 import "mathquill/build/mathquill";
 import {SymNode, Parser} from "./parser";
 import {Pendulum} from './pendulum';
-
 // @ts-ignore
 let MQ = MathQuill.getInterface(MathQuill.getInterface.MAX);
 
@@ -88,7 +87,7 @@ function loadDragBar(){
         defPanel.style.pointerEvents = 'none';
         graphPanel.style.userSelect = 'none';
         graphPanel.style.pointerEvents = 'none';
-        pendulum.canvasResized();
+        pendulum.cr();
     };
 
     const mouseUpHandler = function () {
@@ -142,7 +141,7 @@ function loadDefSettingsBtn(){
             resizer.style.display = "none";
             root.style.gridTemplateColumns = 'max-content 0pt 1fr';
 
-            pendulum.canvasResized();
+            pendulum.cr();
         }else{
             navBar.textContent = "Pendulum";
             mathPanel.style.display = "block";
@@ -150,7 +149,7 @@ function loadDefSettingsBtn(){
             resizer.style.display = "block";
             root.style.gridTemplateColumns = `minmax(${previousLeftWidth}%, max-content) 2.5pt 1fr`;
 
-            pendulum.canvasResized();
+            pendulum.cr();
         }
     }
 }
@@ -218,7 +217,7 @@ class DefControl{
             this.next.previous = this.previous;
         this.labelControl.removeHTML();
         this.statementControl.removeHTML();
-        pendulum.deleteDefinition(this.labelControl.label);
+        pendulum.dd(this.labelControl.label);
     }
     focusNext() {
         this.statementControl.mathquill.blur();
@@ -273,9 +272,9 @@ class DefControl{
      */
     updateDefinition(){
         let oldLabel = this.labelControl.label;
-        this.labelControl.setHint(pendulum.getHint(this.statementControl.statement));
-        pendulum.updateDefinition(this.id, oldLabel, this.labelControl.label, this.statementControl.statement);
-        this.statementControl.setColor(pendulum.queryColor(this.labelControl.label));
+        this.labelControl.setHint(pendulum.gh(this.statementControl.statement));
+        pendulum.ud(this.id, oldLabel, this.labelControl.label, this.statementControl.statement);
+        this.statementControl.setColor(pendulum.qc(this.labelControl.label));
     }
     getLast():DefControl{
         if(this.next==undefined)
@@ -442,8 +441,8 @@ class StatementControl {
         this.colorBox.addEventListener('click', this.toggleVisibility.bind(this));
     }
     toggleVisibility(){
-        pendulum.toggleVisibility(this.labelControl.label);
-        this.setColor(pendulum.queryColor(this.labelControl.label));
+        pendulum.tv(this.labelControl.label);
+        this.setColor(pendulum.qc(this.labelControl.label));
     }
     loadStatement(){
         this.statement = this.parser.toStatementTree(this.mathquill.latex());
