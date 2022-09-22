@@ -1,6 +1,6 @@
 /* jshint esversion: 6 */
 import "mathquill/build/mathquill";
-import {SymNode, Parser} from "./parser";
+import {SN, R} from "./parser";
 import {Pendulum} from './pendulum';
 // @ts-ignore
 let MQ = MathQuill.getInterface(MathQuill.getInterface.MAX);
@@ -290,15 +290,15 @@ class LabelControl {
     public labelField:HTMLElement;
     public type = ':';
     public statementControl:StatementControl;
-    public label: SymNode;
+    public label: SN;
     mathquill: any;
-    parser: Parser;
+    parser: R;
     hinting = false;
     hintTeX = '';
     constructor(parent: DefControl, container: HTMLElement, field: HTMLElement) {
         this.parent = parent;
         this.id = parent.id;
-        this.parser = new Parser();
+        this.parser = new R();
         this.labelContainer = container;
         this.labelField = field;
         this.initiate();
@@ -313,7 +313,7 @@ class LabelControl {
                 edit: this.updateSize.bind(this)
             }
         });
-        this.label = this.parser.toStatementTree(this.mathquill.latex());
+        this.label = this.parser.ts(this.mathquill.latex());
         this.labelField.addEventListener('focusin', this.onFocus.bind(this));
         this.labelField.addEventListener('focusout', this.onFocusExit.bind(this));
         this.onFocusExit();
@@ -326,7 +326,7 @@ class LabelControl {
             this.hintTeX=`\\left(${hint}\\right)`;
         if(this.hinting){
             this.mathquill.latex(this.hintTeX);
-            this.label = this.parser.toStatementTree(this.mathquill.latex());
+            this.label = this.parser.ts(this.mathquill.latex());
         }
     }
     onFocus(){
@@ -338,7 +338,7 @@ class LabelControl {
         this.hinting = this.mathquill.latex()=='';
         if(this.hinting){
             this.mathquill.latex(this.hintTeX);
-            this.label = this.parser.toStatementTree(this.mathquill.latex());
+            this.label = this.parser.ts(this.mathquill.latex());
         }
     }
     /**
@@ -380,13 +380,13 @@ class StatementControl {
     public type = ':';
     public labelControl: LabelControl;
     mathquill: any;
-    parser: Parser;
-    statement: SymNode;
+    parser: R;
+    statement: SN;
     pluginVisuals: {plugin: HTMLElement};
     constructor(parent: DefControl, container: HTMLElement, field: HTMLElement, colorBox:HTMLElement) {
         this.parent = parent;
         this.id = parent.id;
-        this.parser = new Parser();
+        this.parser = new R();
         this.statementContainer = container;
         this.statementField = field;
         this.colorBox = colorBox;
@@ -435,7 +435,7 @@ class StatementControl {
                 downOutOf: () => this.parent.focusNext(),
             }
         });
-        this.statement = this.parser.toStatementTree(this.mathquill.latex());
+        this.statement = this.parser.ts(this.mathquill.latex());
         this.statementContainer.addEventListener('focusin', this.onFocus.bind(this));
         this.statementContainer.addEventListener('focusout', this.onFocusExit.bind(this));
         this.colorBox.addEventListener('click', this.toggleVisibility.bind(this));
@@ -445,7 +445,7 @@ class StatementControl {
         this.setColor(pendulum.qc(this.labelControl.label));
     }
     loadStatement(){
-        this.statement = this.parser.toStatementTree(this.mathquill.latex());
+        this.statement = this.parser.ts(this.mathquill.latex());
         this.parent.updateDefinition();
     }
     onEdit(){
@@ -475,7 +475,7 @@ class StatementControl {
     insertSliderHTML(){
         let html = $.parseHTML(
           `<span  class="slider" > -10
-<input type="range" min="0" max="1000" value="500" id = "${this.id}-slider">
+<input class="sliderComponent" type="range" min="0" max="1000" value="500" id = "${this.id}-slider">
 10
 </span>`
         )[0];
@@ -485,14 +485,15 @@ class StatementControl {
         this.sliderNode.addEventListener('input', ((event:Event)=>{
             // @ts-ignore
             this.updateValue(event.target.value);
-        }))
+        }));
+        this.updateSize();
     }
     updateValue(newValue: number){
         let tex = "";
-        if(this.statement.content=="equal"){
-            tex=this.statement.children[0].token.TeX+"=";
+        if(this.statement.c=="equal"){
+            tex=this.statement.ch[0].s.X+"=";
         }
-        tex+=newValue*0.02-10;
+        tex+=Math.round(1000*(newValue*0.02-10))/1000;
         MQ.MathField(this.statementField).latex(tex);
     }
     deleteSliderHTML(){
